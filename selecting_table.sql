@@ -1,3 +1,6 @@
+\x off
+\pset pager off
+
 SELECT * FROM action_taken LIMIT 10;
 SELECT * FROM agency LIMIT 10;
 SELECT * FROM applicant_race LIMIT 10;
