@@ -1,9 +1,8 @@
 # CS336-Data-proejct
 
-You must also submit a README file (named README.txt) with clearly
-delineated sections for the following. 
-
 0. Please write down the full names and netids of both your team members.
+jk2065, tm858, jv500
+
 1. Are there known issues or functions that aren't working currently in your
    attached code? If so, explain. (note that you will get half credit for any reasonably sized bug that is fully explained in the readme)
 2. Collaboration: Who did you collaborate with on this project? What resources and refer-
