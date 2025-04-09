@@ -296,17 +296,13 @@ CREATE TABLE IF NOT EXISTS Application (
   application_date_indicator TEXT
 );
 WITH LocationMapping AS (
-  SELECT l.location_id, 
-         NULLIF(p.county_code, '') AS county_code,
-         NULLIF(p.msamd, '') AS msamd,
-         p.state_code,
-         NULLIF(p.census_tract_number, '') AS census_tract_number
-  FROM preliminary p, Location l
-  WHERE (NULLIF(p.county_code, '') = l.county_code OR (p.county_code = '' AND l.county_code IS NULL))
-    AND (NULLIF(p.msamd, '') = l.msamd OR (p.msamd = '' AND l.msamd IS NULL))
-    AND p.state_code = l.state_code
-    AND (NULLIF(p.census_tract_number, '') = l.census_tract_number OR 
-         (p.census_tract_number = '' AND l.census_tract_number IS NULL))
+  SELECT DISTINCT ON (p.id) p.id AS pid, l.location_id
+  FROM preliminary p
+  JOIN location l ON
+    (NULLIF(p.county_code, '') = l.county_code OR l.county_code IS NULL)
+    AND (NULLIF(p.msamd, '') = l.msamd OR l.msamd IS NULL)
+    AND (p.state_code = l.state_code)
+    AND (NULLIF(p.census_tract_number, '') = l.census_tract_number OR l.census_tract_number IS NULL)
 )
 INSERT INTO Application
 SELECT 
