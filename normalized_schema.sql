@@ -211,13 +211,13 @@ CREATE TABLE Sex_Code (
   sex_name TEXT
 );
 INSERT INTO Sex_Code
-SELECT DISTINCT applicant_sex, applicant_sex_name
+SELECT DISTINCT applicant_sex::INT, applicant_sex_name
 FROM preliminary
-WHERE applicant_sex IS NOT NULL
+WHERE applicant_sex IS NOT NULL AND applicant_sex != ''
 UNION
-SELECT DISTINCT co_applicant_sex, co_applicant_sex_name
+SELECT DISTINCT co_applicant_sex::INT, co_applicant_sex_name
 FROM preliminary
-WHERE co_applicant_sex IS NOT NULL;
+WHERE co_applicant_sex IS NOT NULL AND co_applicant_sex != '';
 
 -- Nulls Table
 DROP TABLE IF EXISTS Nulls CASCADE;
