@@ -1,14 +1,15 @@
 -- 01. LOAN TYPE
 DROP TABLE IF EXISTS Loan_Type CASCADE;
-CREATE TABLE Loan_Type (
+CREATE TABLE IF NOT EXISTS Loan_Type (
   loan_type INT PRIMARY KEY,
   loan_type_name TEXT
 );
 INSERT INTO Loan_Type
 SELECT DISTINCT loan_type::INT, loan_type_name
 FROM preliminary
-WHERE loan_type IS NOT NULL AND loan_type != '';
-
+WHERE loan_type IS NOT NULL
+  AND loan_type != ''
+  AND loan_type::INT NOT IN (SELECT loan_type FROM Loan_Type);
 
 -- 02. PROPERTY TYPE
 DROP TABLE IF EXISTS Property_Type CASCADE;
