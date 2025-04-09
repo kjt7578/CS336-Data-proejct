@@ -1,0 +1,82 @@
+\COPY (
+  SELECT 
+    a.id,
+    a.as_of_year,
+    a.respondent_id,
+    ag.agency_name,
+    ag.agency_abbr,
+    ag.agency_code,
+    lt.loan_type_name,
+    lt.loan_type,
+    pt.property_type_name,
+    pt.property_type,
+    lp.loan_purpose_name,
+    lp.loan_purpose,
+    oo.owner_occupancy_name,
+    oo.owner_occupancy,
+    a.loan_amount_000s,
+    pa.preapproval_name,
+    pa.preapproval,
+    at.action_taken_name,
+    at.action_taken,
+    ms.msamd_name,
+    ms.msamd,
+    st.state_name,
+    st.state_abbr,
+    st.state_code,
+    co.county_name,
+    co.county_code,
+    l.census_tract_number,
+    ec1.ethnicity_name AS applicant_ethnicity_name,
+    a.applicant_ethnicity,
+    ec2.ethnicity_name AS co_applicant_ethnicity_name,
+    a.co_applicant_ethnicity,
+    rc1.sex_name AS applicant_sex_name,
+    a.applicant_sex,
+    rc2.sex_name AS co_applicant_sex_name,
+    a.co_applicant_sex,
+    a.applicant_income_000s,
+    pc.purchaser_type_name,
+    a.purchaser_type,
+    dr1.denial_reason_name AS denial_reason_name_1,
+    a.denial_reason_1,
+    dr2.denial_reason_name AS denial_reason_name_2,
+    a.denial_reason_2,
+    dr3.denial_reason_name AS denial_reason_name_3,
+    a.denial_reason_3,
+    a.rate_spread,
+    hs.hoepa_status_name,
+    a.hoepa_status,
+    ls.lien_status_name,
+    a.lien_status,
+    a.sequence_number,
+    l.population,
+    l.minority_population,
+    l.hud_median_family_income,
+    l.tract_to_msamd_income,
+    l.number_of_owner_occupied_units,
+    l.number_of_1_to_4_family_units,
+    a.application_date_indicator
+  FROM application a
+  LEFT JOIN loan_type lt ON a.loan_type = lt.loan_type
+  LEFT JOIN property_type pt ON a.property_type = pt.property_type
+  LEFT JOIN loan_purpose lp ON a.loan_purpose = lp.loan_purpose
+  LEFT JOIN agency ag ON a.agency_code = ag.agency_code
+  LEFT JOIN ownocc oo ON a.owner_occupancy = oo.owner_occupancy
+  LEFT JOIN preapprove pa ON a.preapproval = pa.preapproval
+  LEFT JOIN action_taken at ON a.action_taken = at.action_taken
+  LEFT JOIN msamd ms ON a.location_id = ms.msamd
+  LEFT JOIN location l ON a.location_id = l.location_id
+  LEFT JOIN state st ON l.state_code = st.state_code
+  LEFT JOIN county co ON l.county_code = co.county_code
+  LEFT JOIN ethnicity_code ec1 ON a.applicant_ethnicity = ec1.ethnicity_code
+  LEFT JOIN ethnicity_code ec2 ON a.co_applicant_ethnicity = ec2.ethnicity_code
+  LEFT JOIN sex_code rc1 ON a.applicant_sex = rc1.sex_code
+  LEFT JOIN sex_code rc2 ON a.co_applicant_sex = rc2.sex_code
+  LEFT JOIN purchaser_type pc ON a.purchaser_type = pc.purchaser_type
+  LEFT JOIN denial_reason dr1 ON a.denial_reason_1 = dr1.denial_reason_code
+  LEFT JOIN denial_reason dr2 ON a.denial_reason_2 = dr2.denial_reason_code
+  LEFT JOIN denial_reason dr3 ON a.denial_reason_3 = dr3.denial_reason_code
+  LEFT JOIN hoepa_status hs ON a.hoepa_status = hs.hoepa_status
+  LEFT JOIN lien_status ls ON a.lien_status = ls.lien_status
+) TO '/common/home/jk2065/Downloads/final_output.csv' CSV HEADER;
