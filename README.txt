@@ -10,6 +10,7 @@ jk2065, tm858, jv500
 ences did you consult? Please also specify on what aspect of the project you collaborated or
 consulted.
 jk2065: Participated normalized_schema.sql. Created codes for videos(error, output, selecting table) and Recorded videos.
+tm858: Participated normalized_schema.sql. Designed the database structure, implemented key components like the Ethnicity_Code table, properly handled race normalization.
 
 3.What are some interesting questions about mortgages in NJ your database can answer?
 
