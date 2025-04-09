@@ -9,7 +9,7 @@ jk2065, tm858, jv500
 2. Collaboration: Who did you collaborate with on this project? What resources and refer-
 ences did you consult? Please also specify on what aspect of the project you collaborated or
 consulted.
-
+jk2065: Participated normalized_schema.sql. Created codes for videos(error, output, selecting table) and Recorded videos.
 
 3.What are some interesting questions about mortgages in NJ your database can answer?
 
