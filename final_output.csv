@@ -1,5 +1,5 @@
 \COPY (
-  SELECT 
+  SELECT
     a.id,
     a.as_of_year,
     a.respondent_id,
@@ -65,8 +65,8 @@
   LEFT JOIN ownocc oo ON a.owner_occupancy = oo.owner_occupancy
   LEFT JOIN preapprove pa ON a.preapproval = pa.preapproval
   LEFT JOIN action_taken at ON a.action_taken = at.action_taken
-  LEFT JOIN msamd ms ON a.location_id = ms.msamd
   LEFT JOIN location l ON a.location_id = l.location_id
+  LEFT JOIN msamd ms ON l.msamd = ms.msamd
   LEFT JOIN state st ON l.state_code = st.state_code
   LEFT JOIN county co ON l.county_code = co.county_code
   LEFT JOIN ethnicity_code ec1 ON a.applicant_ethnicity = ec1.ethnicity_code
