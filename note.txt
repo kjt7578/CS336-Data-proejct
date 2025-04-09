@@ -1,0 +1,249 @@
+jk2065=> -- Sex Code
+jk2065=> DROP TABLE IF EXISTS Sex_Code CASCADE;
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to constraint application_applicant_sex_fkey on table application
+drop cascades to constraint application_co_applicant_sex_fkey on table application
+DROP TABLE
+jk2065=> CREATE TABLE Sex_Code (
+jk2065(>   sex_code INT PRIMARY KEY,
+jk2065(>   sex_name TEXT
+jk2065(> );
+CREATE TABLE
+jk2065=> INSERT INTO Sex_Code
+jk2065-> SELECT DISTINCT applicant_sex, applicant_sex_name
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_sex IS NOT NULL
+jk2065-> UNION
+jk2065-> SELECT DISTINCT co_applicant_sex, co_applicant_sex_name
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_sex IS NOT NULL;
+ERROR:  column "sex_code" is of type integer but expression is of type text
+LINE 2: SELECT DISTINCT applicant_sex, applicant_sex_name
+                        ^
+HINT:  You will need to rewrite or cast the expression.
+jk2065=> 
+jk2065=> -- Nulls Table
+jk2065=> DROP TABLE IF EXISTS Nulls CASCADE;
+DROP TABLE
+jk2065=> CREATE TABLE Nulls (
+jk2065(>   id SERIAL PRIMARY KEY,
+jk2065(>   edit_status_name TEXT,
+jk2065(>   edit_status TEXT,
+jk2065(>   sequence_number TEXT,
+jk2065(>   application_date_indicator TEXT
+jk2065(> );
+CREATE TABLE
+jk2065=> INSERT INTO Nulls (edit_status_name, edit_status)
+pjk2065-> VALUES (NULL, NULL);
+INSERT 0 1
+jk2065=> 
+jk2065=> -- 17. Location
+jk2065=> DROP TABLE IF EXISTS Location CASCADE;
+NOTICE:  drop cascades to constraint application_location_id_fkey on table application
+DROP TABLE
+jk2065=> CREATE TABLE Location (
+jk2065(>   location_id SERIAL PRIMARY KEY,
+jk2065(>   county_code TEXT REFERENCES County(county_code),
+jk2065(>   msamd TEXT REFERENCES MSAMD(msamd),
+jk2065(>   state_code TEXT REFERENCES State(state_code),
+jk2065(>   census_tract_number TEXT,
+jk2065(>   population INT,
+jk2065(>   minority_population NUMERIC,
+jk2065(>   hud_median_family_income INT,
+jk2065(>   tract_to_msamd_income NUMERIC,
+jk2065(>   number_of_owner_occupied_units INT,
+jk2065(>   number_of_1_to_4_family_units INT,
+jk2065(>   UNIQUE(county_code, msamd, state_code, census_tract_number)
+jk2065(> );
+CREATE TABLE
+jk2065=> INSERT INTO Location (county_code, msamd, state_code, census_tract_number, 
+jk2065(>                      population, minority_population, hud_median_family_income, 
+jk2065(>                      tract_to_msamd_income, number_of_owner_occupied_units, 
+jk2065(>                      number_of_1_to_4_family_units)
+jk2065-> SELECT DISTINCT
+jk2065->     NULLIF(county_code, '') AS county_code, 
+jk2065->     NULLIF(msamd, '') AS msamd,
+jk2065->     state_code,
+jk2065->     NULLIF(census_tract_number, '') AS census_tract_number,
+jk2065->     CASE WHEN population = '' THEN NULL ELSE population::INT END AS population,
+jk2065->     CASE WHEN minority_population = '' THEN NULL ELSE minority_population::NUMERIC END AS minority_population,
+jk2065->     CASE WHEN hud_median_family_income = '' THEN NULL ELSE hud_median_family_income::INT END AS hud_median_family_income,
+jk2065->     CASE WHEN tract_to_msamd_income = '' THEN NULL ELSE tract_to_msamd_income::NUMERIC END AS tract_to_msamd_income,
+jk2065->     CASE WHEN number_of_owner_occupied_units = '' THEN NULL ELSE number_of_owner_occupied_units::INT END AS number_of_owner_occupied_units,
+jk2065->     CASE WHEN number_of_1_to_4_family_units = '' THEN NULL ELSE number_of_1_to_4_family_units::INT END AS number_of_1_to_4_family_units
+jk2065-> FROM preliminary;
+INSERT 0 2135
+jk2065=> 
+jk2065=> -- 18. Application
+jk2065=> DROP TABLE IF EXISTS Application CASCADE;
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to constraint applicant_race_application_id_fkey on table applicant_race
+drop cascades to constraint co_applicant_race_application_id_fkey on table co_applicant_race
+DROP TABLE
+jk2065=> CREATE TABLE Application (
+jk2065(>   id INT PRIMARY KEY,
+jk2065(>   as_of_year INT,
+jk2065(>   respondent_id TEXT,
+jk2065(>   agency_code INT REFERENCES Agency(agency_code),
+jk2065(>   loan_type INT REFERENCES Loan_Type(loan_type),
+jk2065(>   property_type INT REFERENCES Property_Type(property_type),
+jk2065(>   loan_purpose INT REFERENCES Loan_Purpose(loan_purpose),
+jk2065(>   owner_occupancy INT REFERENCES OwnOcc(owner_occupancy),
+jk2065(>   loan_amount_000s INT,
+jk2065(>   preapproval INT REFERENCES PreApprove(preapproval),
+jk2065(>   action_taken INT REFERENCES Action_Taken(action_taken),
+jk2065(>   location_id INT REFERENCES Location(location_id),
+jk2065(>   applicant_ethnicity INT REFERENCES Ethnicity_Code(ethnicity_code),
+jk2065(>   co_applicant_ethnicity INT REFERENCES Ethnicity_Code(ethnicity_code),
+jk2065(>   applicant_sex INT REFERENCES Sex_Code(sex_code),
+jk2065(>   co_applicant_sex INT REFERENCES Sex_Code(sex_code),
+jk2065(>   applicant_income_000s INT,
+jk2065(>   purchaser_type INT REFERENCES Purchaser_Type(purchaser_type),
+jk2065(>   denial_reason_1 INT REFERENCES Denial_Reason(denial_reason_code),
+jk2065(>   denial_reason_2 INT REFERENCES Denial_Reason(denial_reason_code),
+jk2065(>   denial_reason_3 INT REFERENCES Denial_Reason(denial_reason_code),
+jk2065(>   rate_spread TEXT,
+jk2065(>   hoepa_status INT REFERENCES HOEPA_Status(hoepa_status),
+jk2065(>   lien_status INT REFERENCES Lien_Status(lien_status),
+jk2065(>   sequence_number TEXT,
+jk2065(>   application_date_indicator TEXT
+jk2065(> );
+CREATE TABLE
+jk2065=> WITH LocationMapping AS (
+jk2065(>   SELECT l.location_id, 
+jk2065(>          NULLIF(p.county_code, '') AS county_code,
+jk2065(>          NULLIF(p.msamd, '') AS msamd,
+jk2065(>          p.state_code,
+jk2065(>          NULLIF(p.census_tract_number, '') AS census_tract_number
+jk2065(>   FROM preliminary p, Location l
+jk2065(>   WHERE (NULLIF(p.county_code, '') = l.county_code OR (p.county_code = '' AND l.county_code IS NULL))
+jk2065(>     AND (NULLIF(p.msamd, '') = l.msamd OR (p.msamd = '' AND l.msamd IS NULL))
+jk2065(>     AND p.state_code = l.state_code
+jk2065(>     AND (NULLIF(p.census_tract_number, '') = l.census_tract_number OR 
+jk2065(>          (p.census_tract_number = '' AND l.census_tract_number IS NULL))
+jk2065(> )
+jk2065-> INSERT INTO Application
+jk2065-> SELECT 
+jk2065->   p.id,
+jk2065->   CASE WHEN p.as_of_year = '' THEN NULL ELSE p.as_of_year::INT END,
+jk2065->   p.respondent_id,
+jk2065->   CASE WHEN p.agency_code = '' THEN NULL ELSE p.agency_code::INT END,
+jk2065->   CASE WHEN p.loan_type = '' THEN NULL ELSE p.loan_type::INT END,
+jk2065->   CASE WHEN p.property_type = '' THEN NULL ELSE p.property_type::INT END,
+jk2065->   CASE WHEN p.loan_purpose = '' THEN NULL ELSE p.loan_purpose::INT END,
+jk2065->   CASE WHEN p.owner_occupancy = '' THEN NULL ELSE p.owner_occupancy::INT END,
+jk2065->   CASE WHEN p.loan_amount_000s = '' THEN NULL ELSE p.loan_amount_000s::INT END,
+jk2065->   CASE WHEN p.preapproval = '' THEN NULL ELSE p.preapproval::INT END,
+jk2065->   CASE WHEN p.action_taken = '' THEN NULL ELSE p.action_taken::INT END,
+jk2065->   lm.location_id,
+jk2065->   CASE WHEN p.applicant_ethnicity = '' THEN NULL ELSE p.applicant_ethnicity::INT END,
+jk2065->   CASE WHEN p.co_applicant_ethnicity = '' THEN NULL ELSE p.co_applicant_ethnicity::INT END,
+jk2065->   CASE WHEN p.applicant_sex = '' THEN NULL ELSE p.applicant_sex::INT END,
+jk2065->   CASE WHEN p.co_applicant_sex = '' THEN NULL ELSE p.co_applicant_sex::INT END,
+jk2065->   CASE WHEN p.applicant_income_000s = '' THEN NULL ELSE p.applicant_income_000s::INT END,
+jk2065->   CASE WHEN p.purchaser_type = '' THEN NULL ELSE p.purchaser_type::INT END,
+jk2065->   CASE WHEN p.denial_reason_1 = '' THEN NULL ELSE p.denial_reason_1::INT END,
+jk2065->   CASE WHEN p.denial_reason_2 = '' THEN NULL ELSE p.denial_reason_2::INT END,
+jk2065->   CASE WHEN p.denial_reason_3 = '' THEN NULL ELSE p.denial_reason_3::INT END,
+jk2065->   NULLIF(p.rate_spread, ''),
+jk2065->   CASE WHEN p.hoepa_status = '' THEN NULL ELSE p.hoepa_status::INT END,
+jk2065->   CASE WHEN p.lien_status = '' THEN NULL ELSE p.lien_status::INT END,
+jk2065->   NULLIF(p.sequence_number, ''),
+jk2065->   NULLIF(p.application_date_indicator, '')
+jk2065-> FROM preliminary p
+jk2065-> JOIN LocationMapping lm ON 
+jk2065->   (NULLIF(p.county_code, '') = lm.county_code OR (p.county_code = '' AND lm.county_code IS NULL))
+jk2065->   AND (NULLIF(p.msamd, '') = lm.msamd OR (p.msamd = '' AND lm.msamd IS NULL))
+jk2065->   AND p.state_code = lm.state_code
+jk2065->   AND (NULLIF(p.census_tract_number, '') = lm.census_tract_number OR 
+jk2065(>        (p.census_tract_number = '' AND lm.census_tract_number IS NULL));
+ERROR:  duplicate key value violates unique constraint "application_pkey"
+DETAIL:  Key (id)=(2) already exists.
+jk2065=> 
+jk2065=> -- 19. Applicant_Race
+jk2065=> DROP TABLE IF EXISTS Applicant_Race CASCADE;
+DROP TABLE
+jk2065=> CREATE TABLE Applicant_Race (
+jk2065(>   application_id INT REFERENCES Application(id),
+jk2065(>   race_number INT CHECK (race_number BETWEEN 1 AND 5),
+jk2065(>   race_code INT REFERENCES Race_Code(race_code),
+jk2065(>   PRIMARY KEY (application_id, race_number)
+jk2065(> );
+CREATE TABLE
+jk2065=> INSERT INTO Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 1, applicant_race_1::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_race_1 IS NOT NULL AND applicant_race_1 != '';
+ERROR:  insert or update on table "applicant_race" violates foreign key constraint "applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(1) is not present in table "application".
+jk2065=> 
+jk2065=> INSERT INTO Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 2, applicant_race_2::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_race_2 IS NOT NULL AND applicant_race_2 != '';
+ERROR:  insert or update on table "applicant_race" violates foreign key constraint "applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(728) is not present in table "application".
+jk2065=> 
+jk2065=> INSERT INTO Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 3, applicant_race_3::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_race_3 IS NOT NULL AND applicant_race_3 != '';
+ERROR:  insert or update on table "applicant_race" violates foreign key constraint "applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2156) is not present in table "application".
+jk2065=> 
+jk2065=> INSERT INTO Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 4, applicant_race_4::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_race_4 IS NOT NULL AND applicant_race_4 != '';
+ERROR:  insert or update on table "applicant_race" violates foreign key constraint "applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2169) is not present in table "application".
+jk2065=> 
+jk2065=> INSERT INTO Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 5, applicant_race_5::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE applicant_race_5 IS NOT NULL AND applicant_race_5 != '';
+ERROR:  insert or update on table "applicant_race" violates foreign key constraint "applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2169) is not present in table "application".
+jk2065=> 
+jk2065=> 
+jk2065=> -- 20. Co_Applicant_Race
+jk2065=> DROP TABLE IF EXISTS Co_Applicant_Race CASCADE;
+DROP TABLE
+jk2065=> CREATE TABLE Co_Applicant_Race (
+jk2065(>   application_id INT REFERENCES Application(id),
+jk2065(>   race_number INT CHECK (race_number BETWEEN 1 AND 5),
+jk2065(>   race_code INT REFERENCES Race_Code(race_code),
+jk2065(>   PRIMARY KEY (application_id, race_number)
+jk2065(> );
+CREATE TABLE
+jk2065=> INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 1, co_applicant_race_1::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_race_1 IS NOT NULL AND co_applicant_race_1 != '';
+ERROR:  insert or update on table "co_applicant_race" violates foreign key constraint "co_applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(1) is not present in table "application".
+jk2065=> INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 2, co_applicant_race_2::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_race_2 IS NOT NULL AND co_applicant_race_2 != '';
+ERROR:  insert or update on table "co_applicant_race" violates foreign key constraint "co_applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(972) is not present in table "application".
+jk2065=> INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 3, co_applicant_race_3::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_race_3 IS NOT NULL AND co_applicant_race_3 != '';
+ERROR:  insert or update on table "co_applicant_race" violates foreign key constraint "co_applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2169) is not present in table "application".
+jk2065=> INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 4, co_applicant_race_4::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_race_4 IS NOT NULL AND co_applicant_race_4 != '';
+ERROR:  insert or update on table "co_applicant_race" violates foreign key constraint "co_applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2169) is not present in table "application".
+jk2065=> INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
+jk2065-> SELECT id, 5, co_applicant_race_5::INT
+jk2065-> FROM preliminary
+jk2065-> WHERE co_applicant_race_5 IS NOT NULL AND co_applicant_race_5 != '';
+ERROR:  insert or update on table "co_applicant_race" violates foreign key constraint "co_applicant_race_application_id_fkey"
+DETAIL:  Key (application_id)=(2169) is not present in table "application".
+jk2065=> 
