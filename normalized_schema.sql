@@ -1,32 +1,4 @@
--- 0. 실행 타임아웃 해제 (쿼리 실행 시간이 오래 걸릴 경우 대비)
 SET statement_timeout = 0;
-
--------------------------------------------------------
--- 1. 기존 테이블 삭제 (CASCADE로 연결된 제약조건도 삭제)
--------------------------------------------------------
-DROP TABLE IF EXISTS Loan_Type CASCADE;
-DROP TABLE IF EXISTS Property_Type CASCADE;
-DROP TABLE IF EXISTS Loan_Purpose CASCADE;
-DROP TABLE IF EXISTS Agency CASCADE;
-DROP TABLE IF EXISTS OwnOcc CASCADE;
-DROP TABLE IF EXISTS PreApprove CASCADE;
-DROP TABLE IF EXISTS Action_Taken CASCADE;
-DROP TABLE IF EXISTS Purchaser_Type CASCADE;
-DROP TABLE IF EXISTS HOEPA_Status CASCADE;
-DROP TABLE IF EXISTS Lien_Status CASCADE;
-DROP TABLE IF EXISTS Denial_Reason CASCADE;
-DROP TABLE IF EXISTS Race_Code CASCADE;
-DROP TABLE IF EXISTS Ethnicity_Code CASCADE;
-DROP TABLE IF EXISTS Sex_Code CASCADE;
-DROP TABLE IF EXISTS Nulls CASCADE;
-DROP TABLE IF EXISTS Location CASCADE;
-DROP TABLE IF EXISTS Application CASCADE;
-DROP TABLE IF EXISTS Applicant_Race CASCADE;
-DROP TABLE IF EXISTS Co_Applicant_Race CASCADE;
-
--------------------------------------------------------
--- 2. 코드(lookup) 테이블들 생성 및 데이터 삽입
--------------------------------------------------------
 
 -- Loan_Type
 CREATE TABLE IF NOT EXISTS Loan_Type (
