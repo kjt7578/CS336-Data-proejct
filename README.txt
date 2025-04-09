@@ -1,7 +1,7 @@
 # CS336-Data-proejct
 
 0. Please write down the full names and netids of both your team members.
-jk2065, tm858, jv500
+JEONG TAE KIM jk2065, Tayyar Mustamir tm858, Jiwanshu Verma jv500, RITHI CHAUHAN rc1250
 
 1. Are there known issues or functions that aren't working currently in your
    attached code? If so, explain. (note that you will get half credit for any reasonably sized bug that is fully explained in the readme)
