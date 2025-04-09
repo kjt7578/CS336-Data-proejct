@@ -12,6 +12,7 @@ consulted.
 jk2065: Participated normalized_schema.sql. Created codes for videos(error, output, selecting table) and Recorded videos.
 tm858: Participated normalized_schema.sql. Designed the database structure, implemented key components like the Ethnicity_Code table, properly handled race normalization.
 rc1250: Found and wrote out functional dependencies and aided in mapping out structure for normalized tables
+jv500: Wrote out the normalized relations in 3rd Normal Form, ensuring it is lossless and dependancy preserving.
 
 3.What are some interesting questions about mortgages in NJ your database can answer?
 How do loan approval rates differ across various counties in New Jersey, and are there disparities by income level?
