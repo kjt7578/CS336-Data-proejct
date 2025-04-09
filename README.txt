@@ -11,6 +11,7 @@ ences did you consult? Please also specify on what aspect of the project you col
 consulted.
 jk2065: Participated normalized_schema.sql. Created codes for videos(error, output, selecting table) and Recorded videos.
 tm858: Participated normalized_schema.sql. Designed the database structure, implemented key components like the Ethnicity_Code table, properly handled race normalization.
+rc1250: Found and wrote out functional dependencies and aided in mapping out structure for normalized tables
 
 3.What are some interesting questions about mortgages in NJ your database can answer?
 How do loan approval rates differ across various counties in New Jersey, and are there disparities by income level?
