@@ -5,9 +5,10 @@ CREATE TABLE Loan_Type (
   loan_type_name TEXT
 );
 INSERT INTO Loan_Type
-SELECT DISTINCT loan_type, loan_type_name
+SELECT DISTINCT loan_type::INT, loan_type_name
 FROM preliminary
-WHERE loan_type IS NOT NULL;
+WHERE loan_type IS NOT NULL AND loan_type != '';
+
 
 -- 02. PROPERTY TYPE
 DROP TABLE IF EXISTS Property_Type CASCADE;
@@ -16,9 +17,10 @@ CREATE TABLE Property_Type (
   property_type_name TEXT
 );
 INSERT INTO Property_Type
-SELECT DISTINCT property_type, property_type_name
+SELECT DISTINCT property_type::INT, property_type_name
 FROM preliminary
-WHERE property_type IS NOT NULL;
+WHERE property_type IS NOT NULL AND property_type != '';
+
 
 -- 03. LOAN PURPOSE
 DROP TABLE IF EXISTS Loan_Purpose CASCADE;
@@ -27,9 +29,10 @@ CREATE TABLE Loan_Purpose (
   loan_purpose_name TEXT
 );
 INSERT INTO Loan_Purpose
-SELECT DISTINCT loan_purpose, loan_purpose_name
+SELECT DISTINCT loan_purpose::INT, loan_purpose_name
 FROM preliminary
-WHERE loan_purpose IS NOT NULL;
+WHERE loan_purpose IS NOT NULL AND loan_purpose != '';
+
 
 -- 04. AGENCY
 DROP TABLE IF EXISTS Agency CASCADE;
@@ -39,9 +42,10 @@ CREATE TABLE Agency (
   agency_abbr TEXT
 );
 INSERT INTO Agency
-SELECT DISTINCT agency_code, agency_name, agency_abbr
+SELECT DISTINCT agency_code::INT, agency_name, agency_abbr
 FROM preliminary
-WHERE agency_code IS NOT NULL;
+WHERE agency_code IS NOT NULL AND agency_code != '';
+
 
 -- 05. OWNER OCCUPANCY
 DROP TABLE IF EXISTS OwnOcc CASCADE;
@@ -50,9 +54,10 @@ CREATE TABLE OwnOcc (
   owner_occupancy_name TEXT
 );
 INSERT INTO OwnOcc
-SELECT DISTINCT owner_occupancy, owner_occupancy_name
+SELECT DISTINCT owner_occupancy::INT, owner_occupancy_name
 FROM preliminary
-WHERE owner_occupancy IS NOT NULL;
+WHERE owner_occupancy IS NOT NULL AND owner_occupancy != '';
+
 
 -- 06. PREAPPROVAL
 DROP TABLE IF EXISTS PreApprove CASCADE;
@@ -61,9 +66,10 @@ CREATE TABLE PreApprove (
   preapproval_name TEXT
 );
 INSERT INTO PreApprove
-SELECT DISTINCT preapproval, preapproval_name
+SELECT DISTINCT preapproval::INT, preapproval_name
 FROM preliminary
-WHERE preapproval IS NOT NULL;
+WHERE preapproval IS NOT NULL AND preapproval != '';
+
 
 -- 07. ACTION TAKEN
 DROP TABLE IF EXISTS Action_Taken CASCADE;
@@ -72,9 +78,10 @@ CREATE TABLE Action_Taken (
   action_taken_name TEXT
 );
 INSERT INTO Action_Taken
-SELECT DISTINCT action_taken, action_taken_name
+SELECT DISTINCT action_taken::INT, action_taken_name
 FROM preliminary
-WHERE action_taken IS NOT NULL;
+WHERE action_taken IS NOT NULL AND action_taken != '';
+
 
 -- 08. PURCHASER TYPE
 DROP TABLE IF EXISTS Purchaser_Type CASCADE;
@@ -83,9 +90,10 @@ CREATE TABLE Purchaser_Type (
   purchaser_type_name TEXT
 );
 INSERT INTO Purchaser_Type
-SELECT DISTINCT purchaser_type, purchaser_type_name
+SELECT DISTINCT purchaser_type::INT, purchaser_type_name
 FROM preliminary
-WHERE purchaser_type IS NOT NULL;
+WHERE purchaser_type IS NOT NULL AND purchaser_type != '';
+
 
 -- 09. HOEPA STATUS
 DROP TABLE IF EXISTS HOEPA_Status CASCADE;
@@ -94,9 +102,10 @@ CREATE TABLE HOEPA_Status (
   hoepa_status_name TEXT
 );
 INSERT INTO HOEPA_Status
-SELECT DISTINCT hoepa_status, hoepa_status_name
+SELECT DISTINCT hoepa_status::INT, hoepa_status_name
 FROM preliminary
-WHERE hoepa_status IS NOT NULL;
+WHERE hoepa_status IS NOT NULL AND hoepa_status != '';
+
 
 -- 10. LIEN STATUS
 DROP TABLE IF EXISTS Lien_Status CASCADE;
@@ -105,9 +114,10 @@ CREATE TABLE Lien_Status (
   lien_status_name TEXT
 );
 INSERT INTO Lien_Status
-SELECT DISTINCT lien_status, lien_status_name
+SELECT DISTINCT lien_status::INT, lien_status_name
 FROM preliminary
-WHERE lien_status IS NOT NULL;
+WHERE lien_status IS NOT NULL AND lien_status != '';
+
 
 -- 11. DENIAL REASON
 DROP TABLE IF EXISTS Denial_Reason CASCADE;
@@ -116,17 +126,18 @@ CREATE TABLE Denial_Reason (
   denial_reason_name TEXT
 );
 INSERT INTO Denial_Reason
-SELECT DISTINCT denial_reason_1, denial_reason_name_1
+SELECT DISTINCT denial_reason_1::INT, denial_reason_name_1
 FROM preliminary
-WHERE denial_reason_1 IS NOT NULL
+WHERE denial_reason_1 IS NOT NULL AND denial_reason_1 != ''
 UNION
-SELECT DISTINCT denial_reason_2, denial_reason_name_2
+SELECT DISTINCT denial_reason_2::INT, denial_reason_name_2
 FROM preliminary
-WHERE denial_reason_2 IS NOT NULL
+WHERE denial_reason_2 IS NOT NULL AND denial_reason_2 != ''
 UNION
-SELECT DISTINCT denial_reason_3, denial_reason_name_3
+SELECT DISTINCT denial_reason_3::INT, denial_reason_name_3
 FROM preliminary
-WHERE denial_reason_3 IS NOT NULL;
+WHERE denial_reason_3 IS NOT NULL AND denial_reason_3 != '';
+
 
 -- 12. RACE CODE
 DROP TABLE IF EXISTS Race_Code CASCADE;
@@ -135,45 +146,26 @@ CREATE TABLE Race_Code (
   race_name TEXT
 );
 INSERT INTO Race_Code
-SELECT DISTINCT applicant_race_1, applicant_race_name_1
-FROM preliminary
-WHERE applicant_race_1 IS NOT NULL
+SELECT DISTINCT applicant_race_1::INT, applicant_race_name_1 FROM preliminary WHERE applicant_race_1 IS NOT NULL AND applicant_race_1 != ''
 UNION
-SELECT DISTINCT applicant_race_2, applicant_race_name_2
-FROM preliminary
-WHERE applicant_race_2 IS NOT NULL
+SELECT DISTINCT applicant_race_2::INT, applicant_race_name_2 FROM preliminary WHERE applicant_race_2 IS NOT NULL AND applicant_race_2 != ''
 UNION
-SELECT DISTINCT applicant_race_3, applicant_race_name_3
-FROM preliminary
-WHERE applicant_race_3 IS NOT NULL
+SELECT DISTINCT applicant_race_3::INT, applicant_race_name_3 FROM preliminary WHERE applicant_race_3 IS NOT NULL AND applicant_race_3 != ''
 UNION
-SELECT DISTINCT applicant_race_4, applicant_race_name_4
-FROM preliminary
-WHERE applicant_race_4 IS NOT NULL
+SELECT DISTINCT applicant_race_4::INT, applicant_race_name_4 FROM preliminary WHERE applicant_race_4 IS NOT NULL AND applicant_race_4 != ''
 UNION
-SELECT DISTINCT applicant_race_5, applicant_race_name_5
-FROM preliminary
-WHERE applicant_race_5 IS NOT NULL
+SELECT DISTINCT applicant_race_5::INT, applicant_race_name_5 FROM preliminary WHERE applicant_race_5 IS NOT NULL AND applicant_race_5 != ''
 UNION
-SELECT DISTINCT co_applicant_race_1, co_applicant_race_name_1
-FROM preliminary
-WHERE co_applicant_race_1 IS NOT NULL
+SELECT DISTINCT co_applicant_race_1::INT, co_applicant_race_name_1 FROM preliminary WHERE co_applicant_race_1 IS NOT NULL AND co_applicant_race_1 != ''
 UNION
-SELECT DISTINCT co_applicant_race_2, co_applicant_race_name_2
-FROM preliminary
-WHERE co_applicant_race_2 IS NOT NULL
+SELECT DISTINCT co_applicant_race_2::INT, co_applicant_race_name_2 FROM preliminary WHERE co_applicant_race_2 IS NOT NULL AND co_applicant_race_2 != ''
 UNION
-SELECT DISTINCT co_applicant_race_3, co_applicant_race_name_3
-FROM preliminary
-WHERE co_applicant_race_3 IS NOT NULL
+SELECT DISTINCT co_applicant_race_3::INT, co_applicant_race_name_3 FROM preliminary WHERE co_applicant_race_3 IS NOT NULL AND co_applicant_race_3 != ''
 UNION
-SELECT DISTINCT co_applicant_race_4, co_applicant_race_name_4
-FROM preliminary
-WHERE co_applicant_race_4 IS NOT NULL
+SELECT DISTINCT co_applicant_race_4::INT, co_applicant_race_name_4 FROM preliminary WHERE co_applicant_race_4 IS NOT NULL AND co_applicant_race_4 != ''
 UNION
-SELECT DISTINCT co_applicant_race_5, co_applicant_race_name_5
-FROM preliminary
-WHERE co_applicant_race_5 IS NOT NULL;
+SELECT DISTINCT co_applicant_race_5::INT, co_applicant_race_name_5 FROM preliminary WHERE co_applicant_race_5 IS NOT NULL AND co_applicant_race_5 != '';
+
 
 -- 13. MSAMD
 DROP TABLE IF EXISTS MSAMD CASCADE;
@@ -184,7 +176,8 @@ CREATE TABLE MSAMD (
 INSERT INTO MSAMD
 SELECT DISTINCT msamd, msamd_name
 FROM preliminary
-WHERE msamd IS NOT NULL;
+WHERE msamd IS NOT NULL AND msamd != '';
+
 
 -- 14. STATE
 DROP TABLE IF EXISTS State CASCADE;
@@ -196,7 +189,8 @@ CREATE TABLE State (
 INSERT INTO State
 SELECT DISTINCT state_code, state_name, state_abbr
 FROM preliminary
-WHERE state_code IS NOT NULL;
+WHERE state_code IS NOT NULL AND state_code != '';
+
 
 -- 15. COUNTY
 DROP TABLE IF EXISTS County CASCADE;
@@ -207,22 +201,8 @@ CREATE TABLE County (
 INSERT INTO County
 SELECT DISTINCT county_code, county_name
 FROM preliminary
-WHERE county_code IS NOT NULL;
+WHERE county_code IS NOT NULL AND county_code != '';
 
--- Ethnicity Code
-DROP TABLE IF EXISTS Ethnicity_Code CASCADE;
-CREATE TABLE Ethnicity_Code (
-  ethnicity_code INT PRIMARY KEY,
-  ethnicity_name TEXT
-);
-INSERT INTO Ethnicity_Code
-SELECT DISTINCT applicant_ethnicity, applicant_ethnicity_name
-FROM preliminary
-WHERE applicant_ethnicity IS NOT NULL
-UNION
-SELECT DISTINCT co_applicant_ethnicity, co_applicant_ethnicity_name
-FROM preliminary
-WHERE co_applicant_ethnicity IS NOT NULL;
 
 -- Sex Code
 DROP TABLE IF EXISTS Sex_Code CASCADE;
