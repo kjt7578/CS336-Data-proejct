@@ -208,6 +208,21 @@ SELECT DISTINCT co_applicant_sex::INT, co_applicant_sex_name FROM preliminary
 WHERE co_applicant_sex IS NOT NULL AND co_applicant_sex != ''
   AND co_applicant_sex::INT NOT IN (SELECT sex_code FROM Sex_Code);
 
+  CREATE TABLE IF NOT EXISTS Ethnicity_Code (
+  ethnicity_code INT PRIMARY KEY,
+  ethnicity_name TEXT
+);
+INSERT INTO Ethnicity_Code
+SELECT DISTINCT applicant_ethnicity::INT, applicant_ethnicity_name
+FROM preliminary
+WHERE applicant_ethnicity IS NOT NULL AND applicant_ethnicity != ''
+  AND applicant_ethnicity::INT NOT IN (SELECT ethnicity_code FROM Ethnicity_Code)
+UNION
+SELECT DISTINCT co_applicant_ethnicity::INT, co_applicant_ethnicity_name
+FROM preliminary
+WHERE co_applicant_ethnicity IS NOT NULL AND co_applicant_ethnicity != ''
+  AND co_applicant_ethnicity::INT NOT IN (SELECT ethnicity_code FROM Ethnicity_Code);
+
 CREATE TABLE IF NOT EXISTS Nulls (
   id SERIAL PRIMARY KEY,
   edit_status_name TEXT,
@@ -265,8 +280,8 @@ CREATE TABLE IF NOT EXISTS Application (
   preapproval INT REFERENCES PreApprove(preapproval),
   action_taken INT REFERENCES Action_Taken(action_taken),
   location_id INT REFERENCES Location(location_id),
-  applicant_ethnicity INT,
-  co_applicant_ethnicity INT,
+  applicant_ethnicity INT REFERENCES Ethnicity_Code(ethnicity_code),
+  co_applicant_ethnicity INT REFERENCES Ethnicity_Code(ethnicity_code),
   applicant_sex INT REFERENCES Sex_Code(sex_code),
   co_applicant_sex INT REFERENCES Sex_Code(sex_code),
   applicant_income_000s INT,
@@ -336,34 +351,39 @@ CREATE TABLE IF NOT EXISTS Applicant_Race (
   PRIMARY KEY (application_id, race_number)
 );
 INSERT INTO Applicant_Race (application_id, race_number, race_code)
-SELECT id, 1, applicant_race_1::INT
-FROM preliminary
-WHERE applicant_race_1 IS NOT NULL AND applicant_race_1 != ''
-  AND (id, 1) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
+SELECT p.id, 1, p.applicant_race_1::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.applicant_race_1 IS NOT NULL AND p.applicant_race_1 != ''
+  AND (p.id, 1) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
 
 INSERT INTO Applicant_Race (application_id, race_number, race_code)
-SELECT id, 2, applicant_race_2::INT
-FROM preliminary
-WHERE applicant_race_2 IS NOT NULL AND applicant_race_2 != ''
-  AND (id, 2) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
+SELECT p.id, 2, p.applicant_race_2::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.applicant_race_2 IS NOT NULL AND p.applicant_race_2 != ''
+  AND (p.id, 2) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
 
 INSERT INTO Applicant_Race (application_id, race_number, race_code)
-SELECT id, 3, applicant_race_3::INT
-FROM preliminary
-WHERE applicant_race_3 IS NOT NULL AND applicant_race_3 != ''
-  AND (id, 3) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
+SELECT p.id, 3, p.applicant_race_3::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.applicant_race_3 IS NOT NULL AND p.applicant_race_3 != ''
+  AND (p.id, 3) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
 
 INSERT INTO Applicant_Race (application_id, race_number, race_code)
-SELECT id, 4, applicant_race_4::INT
-FROM preliminary
-WHERE applicant_race_4 IS NOT NULL AND applicant_race_4 != ''
-  AND (id, 4) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
+SELECT p.id, 4, p.applicant_race_4::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.applicant_race_4 IS NOT NULL AND p.applicant_race_4 != ''
+  AND (p.id, 4) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
 
 INSERT INTO Applicant_Race (application_id, race_number, race_code)
-SELECT id, 5, applicant_race_5::INT
-FROM preliminary
-WHERE applicant_race_5 IS NOT NULL AND applicant_race_5 != ''
-  AND (id, 5) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
+SELECT p.id, 5, p.applicant_race_5::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.applicant_race_5 IS NOT NULL AND p.applicant_race_5 != ''
+  AND (p.id, 5) NOT IN (SELECT application_id, race_number FROM Applicant_Race);
 
 CREATE TABLE IF NOT EXISTS Co_Applicant_Race (
   application_id INT REFERENCES Application(id),
@@ -372,31 +392,36 @@ CREATE TABLE IF NOT EXISTS Co_Applicant_Race (
   PRIMARY KEY (application_id, race_number)
 );
 INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
-SELECT id, 1, co_applicant_race_1::INT
-FROM preliminary
-WHERE co_applicant_race_1 IS NOT NULL AND co_applicant_race_1 != ''
-  AND (id, 1) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
+SELECT p.id, 1, p.co_applicant_race_1::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.co_applicant_race_1 IS NOT NULL AND p.co_applicant_race_1 != ''
+  AND (p.id, 1) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
 
 INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
-SELECT id, 2, co_applicant_race_2::INT
-FROM preliminary
-WHERE co_applicant_race_2 IS NOT NULL AND co_applicant_race_2 != ''
-  AND (id, 2) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
+SELECT p.id, 2, p.co_applicant_race_2::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.co_applicant_race_2 IS NOT NULL AND p.co_applicant_race_2 != ''
+  AND (p.id, 2) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
 
 INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
-SELECT id, 3, co_applicant_race_3::INT
-FROM preliminary
-WHERE co_applicant_race_3 IS NOT NULL AND co_applicant_race_3 != ''
-  AND (id, 3) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
+SELECT p.id, 3, p.co_applicant_race_3::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.co_applicant_race_3 IS NOT NULL AND p.co_applicant_race_3 != ''
+  AND (p.id, 3) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
 
 INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
-SELECT id, 4, co_applicant_race_4::INT
-FROM preliminary
-WHERE co_applicant_race_4 IS NOT NULL AND co_applicant_race_4 != ''
-  AND (id, 4) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
+SELECT p.id, 4, p.co_applicant_race_4::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.co_applicant_race_4 IS NOT NULL AND p.co_applicant_race_4 != ''
+  AND (p.id, 4) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
 
 INSERT INTO Co_Applicant_Race (application_id, race_number, race_code)
-SELECT id, 5, co_applicant_race_5::INT
-FROM preliminary
-WHERE co_applicant_race_5 IS NOT NULL AND co_applicant_race_5 != ''
-  AND (id, 5) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
+SELECT p.id, 5, p.co_applicant_race_5::INT
+FROM preliminary p
+JOIN Application a ON p.id = a.id
+WHERE p.co_applicant_race_5 IS NOT NULL AND p.co_applicant_race_5 != ''
+  AND (p.id, 5) NOT IN (SELECT application_id, race_number FROM Co_Applicant_Race);
