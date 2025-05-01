@@ -1,6 +1,6 @@
 # CS336-Data-proejct
 
-1. 	Name of all team members
+1. Name of all team members
 JEONG TAE KIM jk2065, Tayyar Mustamir tm858, Jiwanshu Verma jv500, RITHI CHAUHAN rc1250
 
 2. Contributions
@@ -9,10 +9,10 @@ tm858:
 jv500:
 rc1250:
 
-3. 	What you found challenging
+3. What you found challenging
 
 
 4. What you found interesting
 
-5. 	Did you do the extra credit
+5. Did you do the extra credit
 Yes
