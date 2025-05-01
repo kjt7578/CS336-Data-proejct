@@ -1,0 +1,423 @@
+jk2065@ilab1:~/Downloads$ python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+
+Received query via command-line argument.
+
+Database Error: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+
+Is the server running on that host and accepting TCP/IP connections?
+
+
+
+SQLSTATE: None
+
+Message: None
+
+
+
+
+Displaying Thought Process
+Looking at the error message, it means that ilab_script.py tried to connect to the local PostgreSQL database on the ilab server (ilab1) (port 5432 on localhost), but the server refused the connection. In other words, the script failed to access the database server.
+
+Error Cause Analysis:
+
+Database Error: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+
+This error can occur for several common reasons:
+
+PostgreSQL server is not running: The PostgreSQL database server process might not be currently running on the ilab1 server. This is the most common cause.
+Server is not listening for TCP/IP connections: Even if the server is running, it might not be configured to accept TCP/IP connection requests from localhost. This is determined by the `listen_addresses` setting in the PostgreSQL configuration file (postgresql.conf).
+Incorrect host or port: Since the script's `DB_HOST` is localhost and it uses the default port 5432, this possibility is low. However, if the PostgreSQL in the ilab environment is running on a different address or port, the connection could be refused.
+Firewall issue: Although rare, the firewall on the ilab1 server itself might be blocking connections from localhost to port 5432.
+Troubleshooting Steps:
+
+Try the following steps in the ilab1 server terminal:
+
+Check PostgreSQL server status:
+
+Enter the following command in the terminal to check if the PostgreSQL service is running. (The exact command may vary depending on ilab's Linux distribution and PostgreSQL version.)
+Bash
+
+systemctl status postgresql
+# or
+# sudo service postgresql status
+# or using pg_ctl (path check required)
+# pg_ctl -D /path/to/your/data/directory status
+If the service is in an `inactive` or `dead` state, you need to start it. (Start permission might be required.)
+Bash
+
+sudo systemctl start postgresql
+# or
+# sudo service postgresql start
+Try connecting manually with psql:
+
+Try connecting to the database directly using the psql client in the terminal. Use the same information (username, database name) as used in the script.
+Bash
+
+psql -h localhost -U your_netid -d your_cs336_group_db
+(Here, `your_netid` and `your_cs336_group_db` should be replaced with the actual values, same as the script's `DB_USER` and `DB_NAME`.)
+If this command also returns a "Connection refused" error, the problem is definitely with the PostgreSQL server itself or its configuration. If this command succeeds, there might be a specific issue with the Python script or the psycopg2 connection method (although the current error message strongly suggests a server issue).
+Check the script's connection information:
+
+Double-check if the `DB_NAME`, `DB_USER`, and `DB_HOST` variables inside the `ilab_script.py` file exactly match the actual database settings on ilab. (Especially the database name and username!)
+Check the ilab environment:
+
+The Project 0 documentation states to log into ilab and then run a script by typing "postgres" to open the postgres shell. This method might set specific environment variables or run the server in a particular way. Check if the server is running in the way you usually connect to the database. It might be an environment where you need to start the database server manually.
+First things to check: It's most important to verify if the PostgreSQL server is running and accessible via psql using steps 1 and 2. If the server isn't running or psql connection also fails, you might need guidance on how to start and manage the PostgreSQL server in the ilab environment or support from the school.
+
+
+
+jk2065@ilab1:~/Downloads$ systemctl status postgresql
+
+Unit postgresql.service could not be found.
+
+jk2065@ilab1:~/Downloads$ systemctl status postgre
+
+Unit postgre.service could not be found.
+
+jk2065@ilab1:~/Downloads$ postgres -h localhost -U jk2065 -d jk2065
+
+psql: error: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+
+Is the server running on that host and accepting TCP/IP connections?
+
+jk2065@ilab1:~/Downloads$ postgres -h -U jk2065 -d jk2065
+
+psql: error: could not translate host name "-U" to address: Name or service not known
+
+jk2065@ilab1:~/Downloads$ postgres -U jk2065 -d jk2065
+
+psql (14.17 (Ubuntu 14.17-0ubuntu0.22.04.1), server 16.4 (Debian 16.4-1.pgdg120+1))
+
+WARNING: psql major version 14, server major version 16.
+
+Some psql features might not work.
+
+GSSAPI-encrypted connection
+
+Type "help" for help.
+
+
+
+
+Displaying Thought Process
+You've found a really important clue! Let's analyze the command execution results:
+
+`systemctl status postgresql` failure: The failure of these commands means that the way PostgreSQL is managed on the ilab server doesn't use the standard systemd service names (`postgresql` or `postgre`). It doesn't necessarily mean the server isn't running.
+`postgres -h localhost ...` failure: When running `postgres` (which might actually be a wrapper script executing `psql`) with the `-h localhost` option, the "Connection refused" error still occurred. This strongly suggests that the server is not listening for connections on the localhost TCP/IP port (5432).
+`postgres -U jk2065 -d jk2065` success: This is the crucial evidence! When the `postgres` command was executed without the `-h localhost` option, it successfully connected to the psql prompt (`jk2065=>`).
+Conclusion:
+
+The PostgreSQL server is running. However, it's not configured to allow TCP/IP (localhost:5432) connections. Instead, it seems to be accepting local connections via a **Unix domain socket**. The psql client, when no host (-h) is specified, defaults to trying this socket, which is why the last command succeeded.
+
+Solution:
+
+In the `ilab_script.py` code, when calling the `psycopg2.connect()` function, you need to remove the `host='localhost'` parameter that forces a TCP/IP connection. If the `host` parameter is not specified, `psycopg2` will also default to trying the Unix domain socket, which is very likely to succeed.
+
+Modify `ilab_script.py`:
+
+Find the following section in the script:
+
+Python
+
+# Establish database connection
+conn = psycopg2.connect(
+dbname=DB_NAME,
+user=DB_USER,
+host=DB_HOST, # <--- This line!
+password=DB_PASSWORD
+)
+Modify this part as follows (delete or comment out the `host=DB_HOST,` line):
+
+Python
+
+# Establish database connection
+conn = psycopg2.connect(
+dbname=DB_NAME,
+user=DB_USER,
+# host=DB_HOST, # <--- Delete or comment out this line!
+password=DB_PASSWORD # keep password if needed.
+)
+Alternatively, you can explicitly set `host=None`:
+
+Python
+
+# Establish database connection
+conn = psycopg2.connect(
+dbname=DB_NAME,
+user=DB_USER,
+host=None, # <--- Set to None
+password=DB_PASSWORD
+)
+Next Steps:
+
+Modify the `ilab_script.py` file as shown above. (Remove the `host=` parameter or set `host=None`)
+Try running it again:
+Bash
+
+python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+Now it will attempt to connect via the Unix domain socket, so it's highly likely to run successfully!
+
+
+
+jk2065@ilab1:~/Downloads$ python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+
+Received query via command-line argument.
+
+Database Error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+
+Is the server running locally and accepting connections on that socket?
+
+
+
+SQLSTATE: None
+
+Message: None
+
+
+
+
+
+Below is the modified code, please check if it's correct
+
+import sys
+
+import psycopg2
+
+import pandas as pd
+
+import os 
+
+DB_NAME = 'jk2065' 
+
+DB_USER = 'jk2065'
+
+DB_HOST = 'localhost'
+
+DB_PASSWORD = None 
+
+
+def execute_query(sql_query):
+
+"""
+
+Connects to the database, executes the given SQL query,
+
+and prints the results as a formatted table.
+
+
+
+Args:
+
+sql_query (str): The SQL SELECT query to execute.
+
+"""
+
+conn = None
+
+try:
+
+# Establish database connection
+
+conn = psycopg2.connect(
+
+dbname=DB_NAME,
+
+user=DB_USER,
+
+password=DB_PASSWORD
+
+)
+
+
+
+Displaying Thought Process
+Yes, you modified the code correctly! Removing the `host` parameter from the `psycopg2.connect()` function is right.
+
+Let's analyze the new error message:
+
+Database Error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+Is the server running locally and accepting connections on that socket?
+Error Interpretation:
+
+Since `host` was not specified, the `psycopg2` library attempted to connect using the default Unix domain socket path: `/var/run/postgresql/.s.PGSQL.5432`.
+However, the error "No such file or directory" occurred, meaning the socket file doesn't exist at that path.
+This implies that although the PostgreSQL server on ilab is running, it's creating and using the Unix domain socket file at a different path than the default one.
+Problem Solving:
+
+We need to find the **exact path (directory) of the Unix domain socket file** that the PostgreSQL server is actually using and provide it to `psycopg2.connect()`.
+
+How to find the correct socket path:
+
+Using the `\conninfo` command (most reliable method):
+
+Connect to psql using the command that succeeded last time:
+Bash
+
+postgres -U jk2065 -d jk2065
+When the psql prompt (`jk2065=>`) appears, enter the following command:
+SQL
+
+\conninfo
+Among the output information, there will be a "socket" or "host" part. If "host" is shown as a directory path (e.g., `/tmp` or `/var/run/postgresql`), that path is the directory where the socket file resides.
+Checking common paths:
+
+If connecting to psql is difficult or finding it via `\conninfo` is hard, you can try checking common socket paths directly in the terminal. PostgreSQL sockets are often created in the `/tmp` directory.
+Bash
+
+ls -l /tmp/.s.PGSQL.*
+If this command shows a file (e.g., `/tmp/.s.PGSQL.5432`), then the socket directory is `/tmp`.
+Alternatively, you can recheck the path that was originally attempted (as it could be a permission issue):
+Bash
+
+ls -l /var/run/postgresql/
+Final modification to `ilab_script.py`:
+
+Let's assume you found the correct socket directory path using the methods above. For example, if the path was confirmed as `/tmp`, modify the `psycopg2.connect()` function as follows. Re-add the `host` parameter, but specify the directory path where the socket file exists as its value.
+
+Python
+
+# Establish database connection
+conn = psycopg2.connect(
+dbname=DB_NAME,
+user=DB_USER,
+host='/tmp', # <-- Modify with the found socket directory path! (e.g., /tmp)
+password=DB_PASSWORD
+)
+If the socket directory is `/var/run/postgresql`, then modify it to `host='/var/run/postgresql'`.
+
+Summary:
+
+Connect with `postgres -U jk2065 -d jk2065` and run `\conninfo` to check the socket directory (most recommended).
+Or estimate the socket directory using `ls -l /tmp/.s.PGSQL.*` etc.
+Specify the found directory path as the value for the `host` parameter in the `psycopg2.connect()` function in `ilab_script.py`.
+Rerun the script.
+Now `psycopg2` should be able to find the correct socket file and connect!
+
+
+jk2065@ilab1:~/Downloads$ postgres -U jk2065 -d jk2065
+
+psql (14.17 (Ubuntu 14.17-0ubuntu0.22.04.1), server 16.4 (Debian 16.4-1.pgdg120+1))
+
+WARNING: psql major version 14, server major version 16.
+
+Some psql features might not work.
+
+GSSAPI-encrypted connection
+
+Type "help" for help.
+
+
+
+jk2065=> \conninfo
+
+You are connected to database "jk2065" as user "jk2065" on host "postgres.cs.rutgers.edu" (address "172.16.90.115") at port "5432".
+
+GSSAPI-encrypted connection
+
+jk2065=> exit;
+
+jk2065@ilab1:~/Downloads$ ls -l /tmp/.s.PGSQL.*
+
+srwxrwxrwx 1 zc366 zc366 0 Mar 6 20:31 /tmp/.s.PGSQL.5432
+
+-rw------- 1 zc366 zc366 59 Mar 6 20:31 /tmp/.s.PGSQL.5432.lock
+
+jk2065@ilab1:~/Downloads$ ls -l /var/run/postgresql/
+
+ls: cannot access '/var/run/postgresql/': No such file or directory
+
+jk2065@ilab1:~/Downloads$
+
+
+
+
+Displaying Thought Process
+Okay, the situation is clearer now, but there are still some slightly confusing parts. Let's look at the results one by one.
+
+`\conninfo` Result:
+
+You are connected to database "jk2065" as user "jk2065" on host "postgres.cs.rutgers.edu" (address "172.16.90.115") at port "5432".
+This is very important information! It means that when you successfully connected using the `postgres -U jk2065 -d jk2065` command, you actually connected via TCP/IP to the remote host `postgres.cs.rutgers.edu` on port 5432, not via a Unix socket.
+The fact that the connection was refused when using `-h localhost` previously, and succeeded when `-h` was omitted, seems slightly contradictory. It's possible that the `postgres` command or the default `psql` settings in the ilab environment are configured to automatically connect to the `postgres.cs.rutgers.edu` host when `-h` is absent.
+`ls -l /tmp/.s.PGSQL.*` Result:
+
+The `/tmp/.s.PGSQL.5432` socket file does exist.
+However, the important point is: the owner of this file is `zc366`. This means user `jk2065` likely doesn't have permission to access this socket file. Therefore, even if this path was specified as the `host` parameter in `psycopg2`, the connection would have failed due to permission issues.
+`ls -l /var/run/postgresql/` Result:
+
+It was confirmed that this directory doesn't exist, so the default socket path that `psycopg2` tried is definitely not it.
+Final Conclusion and Solution:
+
+The most reliable information is the result from `\conninfo` obtained after a successful connection. According to this information, the Python script should also connect using TCP/IP to the host `postgres.cs.rutgers.edu`.
+
+Final modification to `ilab_script.py`:
+
+Modify the `psycopg2.connect()` function as follows. Explicitly specify `postgres.cs.rutgers.edu` in the `host` parameter. Port 5432 is the default, but explicitly writing it is good practice.
+
+Python
+
+# Establish database connection
+conn = psycopg2.connect(
+dbname=DB_NAME, # 'jk2065' (same as before)
+user=DB_USER, # 'jk2065' (same as before)
+host='postgres.cs.rutgers.edu', # <-- Hostname confirmed from \conninfo!
+port='5432', # <-- Port confirmed from \conninfo (default, but explicit)
+password=DB_PASSWORD # keep password if needed.
+)
+Also modify the `DB_HOST` variable at the top of the code:
+
+For code readability, it's good practice to align the variable settings at the top.
+
+Python
+
+# Hardcoded example (Replace these placeholders!)
+DB_NAME = 'jk2065'
+DB_USER = 'jk2065'
+DB_HOST = 'postgres.cs.rutgers.edu' # <-- Modify here too!
+DB_PASSWORD = None
+Next Steps:
+
+Modify the `ilab_script.py` file as shown above with `host='postgres.cs.rutgers.edu'` and `port='5432'` (optional but recommended).
+Try running the script again:
+Bash
+
+python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+Now it will attempt to connect using the exact host and port confirmed by `\conninfo`, so it should succeed!
+
+
+jk2065@ilab1:~/Downloads$ python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+
+Received query via command-line argument.
+
+Executing query: SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;
+
+loan_type_name
+
+Conventional
+
+Database connection closed.
+
+jk2065@ilab1:~/Downloads$
+
+
+
+
+
+Did it work?
+
+
+
+
+Displaying Thought Process
+Yes, it seems to have worked perfectly! 🎉
+
+Looking at the output, everything was processed successfully:
+
+Received query via command-line argument. : The script received the query via command-line argument correctly.
+Executing query: SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1; : It attempted to execute the exact query you entered.
+loan_type_name
+Conventional
+: It successfully fetched the query results from the database and printed them neatly in a table format to **standard output (stdout)** using pandas. The results appeared without any error messages.
+Database connection closed. : The database connection was also closed properly after the task was completed.
+It now seems that `ilab_script.py` correctly takes a given SELECT query, executes it on the `postgres.cs.rutgers.edu` database, and outputs the results properly. Since the extra credit part (handling standard input) is also implemented, this script appears to satisfy all requirements!
+
