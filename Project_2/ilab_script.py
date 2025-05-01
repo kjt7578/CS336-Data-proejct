@@ -1,10 +1,28 @@
+###
+# What you need to know before using this code #
+# Make sure you change DB_NAME and DB_USER
+# This file should be on ILAB
+#
+# This is an example script to see if it's working (Make sure your current dir is where the fileis  located)
+# python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+# 
+# And this is an example output
+# jk2065@ilab1:~/Downloads$ python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
+# Received query via command-line argument.
+# Executing query: SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;
+# loan_type_name
+#   Conventional
+# Database connection closed.
+# jk2065@ilab1:~/Downloads$ 
+###
+
 import sys
 import psycopg2
 import pandas as pd
 import os
 
-DB_NAME = 'jk2065' #Change this into the Group DB name
-DB_USER = 'jk2065' #Change this into your NetID
+DB_NAME = 'jk2065' #Change this to the Group DB name
+DB_USER = 'jk2065' #Change this to your NetID
 DB_HOST = 'postgres.cs.rutgers.edu'
 DB_PASSWORD = None
 
