@@ -1,9 +1,9 @@
 ###
 # What you need to know before using this code #
 # Make sure you change DB_NAME and DB_USER
-# This file should be on ILAB
+# This file should be on ILAB and run on ILAB
 #
-# This is an example script to see if it's working (Make sure your current dir is where the fileis  located)
+# This is an example script to see if it's working (Make sure your current dir is where the file is located)
 # python3 ilab_script.py "SELECT loan_type_name FROM Loan_Type WHERE loan_type = 1;"
 # 
 # And this is an example output
