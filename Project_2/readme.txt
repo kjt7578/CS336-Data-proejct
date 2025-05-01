@@ -1,9 +1,3 @@
-	Naming all team members
-	their contributions
-	What you found challenging
-	What you found interesting
-	Did you do the extra credit
-
 # CS336-Data-proejct
 
 1. 	Name of all team members
