@@ -40,11 +40,11 @@ class DatabaseLLM:
             print("Error: schema_subset.sql not found!")
             sys.exit(1)
 
-    def test_ssh_conn(self, host, user, pwd, to):
+    def test_ssh_conn(self, host, user, pwd, timeout):
         cl = paramiko.SSHClient()
         cl.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            cl.connect(hostname=host, port=22, username=user, password=pwd, timeout=to)
+            cl.connect(hostname=host, port=22, username=user, password=pwd, timeout=timeout)
             tp = cl.get_transport()
             if tp and tp.is_active():
                 cl.close()
@@ -69,7 +69,13 @@ class DatabaseLLM:
             sys.exit(1)
         
     def generate_query(self, user_question):
-        prompt = f"""You are an SQL query generator that works with the provided database schema {self.schema}. The user will provide the question here: {user_question}. You are to generate simply an SQL SELECT query. No explanations or additional text are allowed, so do not generate them. Only the generated query. It should be a valid PostGRES SQL SELECT statement. 
+        prompt = f"""You are an SQL query generator that works with the provided database schema: 
+    
+        {self.schema}
+        
+        The user will provide the question here: {user_question} 
+        
+        You are to generate simply an SQL SELECT query. No explanations are allowed, so do not generate them. Only generate the query that best works with the question. It should be a valid PostGRES SQL SELECT statement. 
         
         SQL Query:"""
         
@@ -151,10 +157,10 @@ class DatabaseLLM:
                 
             print("\nGenerating SQL query...")
             llm_response = self.generate_query(user_question)
-            print(f"LLM Response: {llm_response}")
+            print(f"LLM Response: \n {llm_response}")
             
             sql_query = self.extract_sql_query(llm_response)
-            print(f"Extracted SQL Query: {sql_query}")
+            print(f"Extracted SQL Query: \n {sql_query}")
             
             print("\nExecuting query on ILAB...")
             result = self.execute_query_on_ilab(sql_query, use_stdin=True)  # Use stdin for extra credit
