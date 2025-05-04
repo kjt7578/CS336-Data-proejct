@@ -20,7 +20,8 @@ class DatabaseLLM:
         self.llm = Llama(
             model_path="./Phi-3.5-mini-instruct-Q4_K_M.gguf",
             n_ctx=2048,
-            n_threads=4
+            n_threads=4,
+            verbose=False
         )
 
         self.schema = self._load_schema()
@@ -67,48 +68,68 @@ class DatabaseLLM:
         else:
             print("Failed to connect to SSH. Please check your credentials and try again.")
             sys.exit(1)
-        
+
     def generate_query(self, user_question):
-        prompt = f"""You are an SQL query generator that works with the provided database schema: 
-    
+        prompt = f"""You are an SQL query generator that works with the provided database schema:
+
         {self.schema}
-        
-        The user will provide the question here: {user_question} 
-        
-        You are to generate simply an SQL SELECT query. No explanations are allowed, so do not generate them. Only generate the query that best works with the question. It should be a valid PostGRES SQL SELECT statement. 
-        
+
+        Based on the schema, generate ONLY the single SELECT SQL query required for this question.
+        Do NOT include transaction control statements like BEGIN, COMMIT, or ROLLBACK.
+        Wrap the SQL query in ```sql ... ``` fences. Do not add any text before or after the fences.
+
+        Question: {user_question}
+
         SQL Query:"""
-        
+
         output = self.llm(
             prompt,
             max_tokens=200,
-            stop=["</s>", "\n\n"],
+            stop=["</s>"],
             echo=False
         )
-        
-        return output['choices'][0]['text'].strip()
-    
-    def extract_sql_query(self, llm_response):
-        patterns = [
-            r'SELECT.*?;',
-            r'SELECT.*?(?=\n|$)',
-            r'SQL Query:?\s*(SELECT.*?)(?=\n|$)',
-            r'```sql\s*(SELECT.*?)\s*```',
-            r'```\s*(SELECT.*?)\s*```'
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, llm_response, re.IGNORECASE | re.DOTALL)
-            if match:
-                sql_query = match.group(1 if pattern.count('(') > 0 else 0)
-                sql_query = sql_query.strip()
-                if not sql_query.endswith(';'):
-                    sql_query += ';'
-                return sql_query
 
-        return llm_response.strip()
+        raw_response = output['choices'][0]['text'].strip()
+
+        sql_query = ""
+
+        match = re.search(r"```(?:sql)?\s*(.*?)\s*```", raw_response, re.IGNORECASE | re.DOTALL)
+        if match:
+            sql_query = match.group(1).strip()
+        else:
+            sql_query = raw_response
+
+        if sql_query:
+            sql_query = sql_query.removeprefix("BEGIN;").strip()
+            sql_query = sql_query.removesuffix("COMMIT;").strip()
+            if sql_query and not sql_query.endswith(';'):
+                sql_query += ';'
+            if sql_query == ';':
+                sql_query = ""
+
+        print(f"Cleaned Query from generate_query: '{sql_query}'")
+
+        return sql_query
+
+    '''def extract_sql_query(self, llm_response):
+        match = re.search(r"```(?:sql)?\s*(.*?)\s*```", llm_response, re.IGNORECASE | re.DOTALL)
+        if match:
+            sql_query = match.group(1).strip()
+        else:
+            sql_query = llm_response.strip()
+
+        if sql_query and not sql_query.endswith(';'):
+            sql_query += ';'
+
+        if sql_query == ';':
+            print("Warning: Extracted query is empty ';'. Check LLM generation.", file=sys.stderr)
+            return ""
+
+        return sql_query'''
     
     def execute_query_on_ilab(self, sql_query, use_stdin=False):
+        if not sql_query:
+            return "Error: Cannot execute an empty SQL query."
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -122,50 +143,51 @@ class DatabaseLLM:
 
             if use_stdin:
                 command = f'python3 {script_path}'
-                stdin, stdout, stderr = ssh.exec_command(command, get_pty=True)
-                stdin.write(sql_query + '\n')
+                stdin, stdout, stderr = ssh.exec_command(command, get_pty=False)
+                stdin.write(sql_query.replace('\n', ' ') + '\n')
                 stdin.flush()
                 stdin.channel.shutdown_write()
             else:
                 command = f'python3 {script_path} "{sql_query.replace('"', '\\"')}"'
-                stdin, stdout, stderr = ssh.exec_command(command, get_pty=True)
+                stdin, stdout, stderr = ssh.exec_command(command, get_pty=False)
 
-            error_output = stderr.read().decode()
             std_output = stdout.read().decode()
+            error_output = stderr.read().decode()
             
             ssh.close()
-            
-            if error_output and "Database Error" in error_output:
-                return f"Error: {error_output}"
+
+            if error_output:
+                return f"Error Output (stderr):\n{error_output}\nStandard Output (stdout):\n{std_output}"
             else:
                 return std_output
-            
+
         except Exception as e:
-            return f"SSH Error: {str(e)}"
-    
+            return f"SSH Connection/Execution Error: {str(e)}"
+
     def run_interactive_loop(self):
         print("Data LLM: Ask about the database.")
         print("Type 'exit' to quit")
         print("==========================")
-        
+
         while True:
             user_question = input("\nEnter your question: ")
-            
+
             if user_question.lower() == "exit":
                 print("Goodbye!")
                 break
-                
+
             print("\nGenerating SQL query...")
-            llm_response = self.generate_query(user_question)
-            print(f"LLM Response: \n {llm_response}")
-            
-            sql_query = self.extract_sql_query(llm_response)
-            print(f"Extracted SQL Query: \n {sql_query}")
-            
+            sql_query = self.generate_query(user_question)
+
+            print(f"Using SQL Query: \n {sql_query}")
+
             print("\nExecuting query on ILAB...")
-            result = self.execute_query_on_ilab(sql_query, use_stdin=True)  # Use stdin for extra credit
-            print("\nQuery Result:")
-            print(result)
+            if not sql_query:
+                print("\nQuery Result:\nError: LLM did not generate a valid SQL query after cleaning.")
+            else:
+                result = self.execute_query_on_ilab(sql_query, use_stdin=True)
+                print("\nQuery Result:")
+                print(result)
             print("-" * 50)
 
 def main():
