@@ -1,6 +1,7 @@
 import paramiko
 import sys
 import os
+import time
 from getpass import getpass
 
 
@@ -68,9 +69,10 @@ def up_connect():
                 sys.exit(1)
 
             print("==========Finish SSH Authentication Module==========")
+            time.sleep(1)
             os.system('cls' if os.name == 'nt' else 'clear')
             print("==========================")
-            print("SSH Credentials Processed")
+            print("SSH Configuration Processed")
             print("==========================")
             return {
                 'hostname': host,

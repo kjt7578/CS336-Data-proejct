@@ -10,6 +10,7 @@
 # import packages
 import sys
 import os
+import time
 import paramiko
 from llama_cpp import Llama
 
@@ -54,6 +55,7 @@ class LLM:
                 timeout=timeout
             )
             print("Storing connection...")
+            time.sleep(1)
             print("Created persistent SSH connection.")
             print("SSH configuration loaded successfully.")
 
@@ -92,6 +94,8 @@ class LLM:
         )
         if f:
             print("ilab_script.py exists. Proceed.")
+            time.sleep(1)
+            os.system('cls' if os.name == 'nt' else 'clear')
             return True
         else:
             print("ilab_script.py doesn't exist! Maybe you typed the directory name wrong?")
@@ -146,7 +150,7 @@ def main():
     finally:
         if db_llm:
             db_llm.close_ssh()
-        print("Connection closed. Exiting program.")
+        print("Exiting program.")
         sys.exit(0)
 
 if __name__ == "__main__":
