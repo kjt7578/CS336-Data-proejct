@@ -1,7 +1,7 @@
 ###
 # Execute generated SQL on remote iLab via remote script.
 # Gets passed the persistent SSH connection established in data_llm.py
-# and
+# and the config for the script location
 ###
 
 def ilab(sql, ssh, config):

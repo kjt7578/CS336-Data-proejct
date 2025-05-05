@@ -26,12 +26,12 @@ def test_conn(host, user, pwd, timeout):
             cl.close()
 
 def home(host, user, pwd, timeout=5):
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    cl = paramiko.SSHClient()
+    cl.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     home_dir = None
     try:
-        client.connect(hostname=host, port=22, username=user, password=pwd, timeout=timeout)
-        stdin, stdout, stderr = client.exec_command('pwd')
+        cl.connect(hostname=host, port=22, username=user, password=pwd, timeout=timeout)
+        stdin, stdout, stderr = cl.exec_command('pwd')
         exit_status = stdout.channel.recv_exit_status()
         if exit_status == 0:
              home_dir = stdout.read().decode().strip()
@@ -39,8 +39,8 @@ def home(host, user, pwd, timeout=5):
              error = stderr.read().decode().strip()
              print(f"Authenticator: Error getting home directory: {error}")
     finally:
-        if client:
-            client.close()
+        if cl:
+            cl.close()
     return home_dir
 
 
