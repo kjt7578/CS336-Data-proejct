@@ -16,3 +16,6 @@ rc1250:
 
 5. Did you do the extra credit
 Yes
+
+Referenced code:
+Some Paramiko SSH Connection code: https://qxf2.com/blog/ssh-using-python-paramiko/
