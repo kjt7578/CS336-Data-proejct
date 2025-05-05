@@ -18,7 +18,7 @@ from llama_cpp import Llama
 import authenticator
 import file_exists
 import ilab_exec as run
-import processing as data_llm
+import processing_prompt as data_llm
 
 class LLM:
     def __init__(self):
