@@ -1,3 +1,7 @@
+###
+# Handles cleaning the output of the LLM and returns the cleaned version
+###
+
 import re
 
 def cleaner(raw):

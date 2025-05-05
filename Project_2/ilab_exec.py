@@ -1,3 +1,9 @@
+###
+# Execute generated SQL on remote iLab via remote script.
+# Gets passed the persistent SSH connection established in data_llm.py
+# and
+###
+
 def ilab(sql, ssh, config):
     if not sql:
         return "Error: Cannot execute an empty SQL query."
