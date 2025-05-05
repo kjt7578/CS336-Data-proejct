@@ -18,4 +18,21 @@ rc1250:
 Yes
 
 Referenced code:
-Some Paramiko SSH Connection code: https://qxf2.com/blog/ssh-using-python-paramiko/
+
+llama-cpp-python docs for implementing LLM usage: https://github.com/abetlen/llama-cpp-python
+
+Paramiko usage and API:
+https://docs.paramiko.org/en/stable/
+https://docs.paramiko.org/en/stable/api/sftp.html
+https://qxf2.com/blog/ssh-using-python-paramiko/
+https://www.linode.com/docs/guides/use-paramiko-python-to-ssh-into-a-server/
+https://medium.com/featurepreneur/ssh-in-python-using-paramiko-e08fd8a039f7
+https://medium.com/nerd-for-tech/paramiko-how-to-transfer-files-with-remote-system-sftp-servers-using-python-52d3e51d2cfa
+
+Regular Expressions (VERY USEFUL):
+https://docs.python.org/3/library/re.html
+https://www.w3schools.com/python/python_regex.asp
+
+Try/Except and Exceptions, very useful compared to debug statements and the like (especially with Paramiko):
+https://docs.python.org/3/library/exceptions.html
+https://www.w3schools.com/python/python_try_except.asp
