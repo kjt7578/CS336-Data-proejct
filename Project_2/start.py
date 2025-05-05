@@ -1,15 +1,17 @@
 ###
-# Make sure that the schema_subset.sql, data_llm.py, and the model (Phi-3.5-mini-instruct-Q4_K_M.gguf)
-# are in the same folder. Paths or URLs are not hardcoded, so choose whatever iLab you like, as well as where your
-# iLab script is located. Give only the path to the folder it is within, not the actual path of the file. Trailing
-# slashes are ignored.
+# This is the main file, where all execution should begin!
+# Make sure that the following files are in the same directory:
+# schema_subset.sql, start.py, data_llm.py, authenticator.py, cleaner.py, file_exists.py, ilab_exec.py, and the model (Phi-3.5-mini-instruct-Q4_K_M.gguf).
+# Paths or URLs are not hardcoded, so choose whatever iLab you like, as well as where your
+# iLab script is located. Give only the path to the folder it is within, not the actual path of the file.
+# Trailing slashes are ignored.
 ###
 
 # import packages
 import sys
 import os
 import paramiko
-from llama_cpp import Llama as llama
+from llama_cpp import Llama
 
 # import required modules
 import authenticator
@@ -20,7 +22,7 @@ import data_llm
 class LLM:
     def __init__(self):
         print("Loading LLM...")
-        self.llm = llama(
+        self.llm = Llama(
             model_path="./Phi-3.5-mini-instruct-Q4_K_M.gguf",
             n_ctx=2048,
             n_threads=4,
