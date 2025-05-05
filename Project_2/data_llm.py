@@ -5,35 +5,32 @@
 # slashes are ignored.
 ###
 
-#!/usr/bin/env python3
+# import packages
 import sys
 import os
-import re
 import paramiko
-import subprocess
-from getpass import getpass
-from llama_cpp import Llama
+from llama_cpp import Llama as llama
 
-class DatabaseLLM:
+# import required modules
+import authenticator
+import file_exists
+import ilab_exec as run
+import cleaner as cut
+
+class LLM:
     def __init__(self):
         print("Loading LLM...")
-        self.llm = Llama(
+        self.llm = llama(
             model_path="./Phi-3.5-mini-instruct-Q4_K_M.gguf",
             n_ctx=2048,
             n_threads=4,
             verbose=False
         )
+        self.schema = self.schematic()
+        self.ssh_config = {}
+        self.persist_sshclient = None
 
-        self.schema = self._load_schema()
-
-        self.ssh_config = {
-            'hostname': None,
-            'username': None,
-            'password': None,
-            'script_location': None
-        }
-        
-    def _load_schema(self):
+    def schematic(self):
         try:
             with open('schema_subset.sql', 'r') as f:
                 return f.read()
@@ -41,35 +38,66 @@ class DatabaseLLM:
             print("Error: schema_subset.sql not found!")
             sys.exit(1)
 
-    def test_ssh_conn(self, host, user, pwd, timeout):
-        cl = paramiko.SSHClient()
-        cl.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        try:
-            cl.connect(hostname=host, port=22, username=user, password=pwd, timeout=timeout)
-            tp = cl.get_transport()
-            if tp and tp.is_active():
-                cl.close()
-                return True
-            else:
-                return False
-        except Exception as e:
-            print(f"Error connecting to {host}:{22}: {e}")
-            return False
-        finally:
-            cl.close()
 
-    def setup_ssh(self):
-        self.ssh_config['hostname'] = input("Enter the iLab address: ")
-        self.ssh_config['username'] = input("Enter your iLab username: ")
-        self.ssh_config['password'] = getpass("Enter your iLab password: ")
-        self.ssh_config['script_location'] = input("Where is your ilab_script.py located on the iLab (just to the folder it lives within)? ").rstrip('/')
-        if self.test_ssh_conn(self.ssh_config['hostname'], self.ssh_config['username'], self.ssh_config['password'], 5):
-            print("SSH connection successful!")
-        else:
-            print("Failed to connect to SSH. Please check your credentials and try again.")
+    def setup_ssh(self, timeout=10):
+        print("Initial SSH Connection Test:")
+        self.ssh_config = authenticator.up_connect()
+        print("\nEstablishing persistent SSH connection...")
+        try:
+            self.persist_sshclient = paramiko.SSHClient()
+            self.persist_sshclient.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.persist_sshclient.connect(
+                hostname=self.ssh_config['hostname'],
+                username=self.ssh_config['username'],
+                password=self.ssh_config['password'],
+                timeout=timeout
+            )
+            print("Storing connection...")
+            print("Created persistent SSH connection.")
+            print("SSH configuration loaded successfully.")
+
+        except paramiko.AuthenticationException:
+            print(f"Authentication failed when establishing persistent connection for {self.ssh_config.get('username')}@{self.ssh_config.get('hostname')}.")
+            self.persist_sshclient = None
+            sys.exit(1)
+        except Exception as e:
+            print(f"Failed to establish persistent SSH connection for some other reason: {e}")
+            self.close_ssh()
             sys.exit(1)
 
-    def generate_query(self, user_question):
+    def close_ssh(self):
+        if self.persist_sshclient:
+            print("\nClosing persistent connection...")
+            try:
+                self.persist_sshclient.close()
+                print("SSH connection closed.")
+                self.persist_sshclient = None
+            except Exception as e:
+                print(f"Error closing SSH connection: {e}")
+
+    def script_exists(self):
+        if not self.persist_sshclient or not self.persist_sshclient.get_transport().is_active():
+             print("Error: SSH connection is not active for file check.")
+             sys.exit(1)
+        if 'home_directory' not in self.ssh_config:
+            print("Error: Remote home directory was not determined during setup.")
+            sys.exit(1)
+
+        f = file_exists.exists(
+            ssh=self.persist_sshclient,
+            path=self.ssh_config['script_location'],
+            file_name='ilab_script.py',
+            home_dir=self.ssh_config['home_directory']
+        )
+        if f:
+            print("ilab_script.py exists. Proceed.")
+            return True
+        else:
+            print("ilab_script.py doesn't exist! Maybe you typed the directory name wrong?")
+            self.close_ssh()
+            sys.exit(1)
+
+    def gen(self, user_question):
         prompt = f"""You are an SQL query generator that works with the provided database schema:
 
         {self.schema}
@@ -82,126 +110,67 @@ class DatabaseLLM:
 
         SQL Query:"""
 
-        output = self.llm(
+        out = self.llm(
             prompt,
             max_tokens=200,
             stop=["</s>"],
             echo=False
         )
 
-        raw_response = output['choices'][0]['text'].strip()
+        cleaned = cut.cleaner(out)
 
-        sql_query = ""
+        return cleaned
 
-        match = re.search(r"```(?:sql)?\s*(.*?)\s*```", raw_response, re.IGNORECASE | re.DOTALL)
-        if match:
-            sql_query = match.group(1).strip()
-        else:
-            sql_query = raw_response
-
-        if sql_query:
-            sql_query = sql_query.removeprefix("BEGIN;").strip()
-            sql_query = sql_query.removesuffix("COMMIT;").strip()
-            if sql_query and not sql_query.endswith(';'):
-                sql_query += ';'
-            if sql_query == ';':
-                sql_query = ""
-
-        print(f"Cleaned Query from generate_query: '{sql_query}'")
-
-        return sql_query
-
-    '''def extract_sql_query(self, llm_response):
-        match = re.search(r"```(?:sql)?\s*(.*?)\s*```", llm_response, re.IGNORECASE | re.DOTALL)
-        if match:
-            sql_query = match.group(1).strip()
-        else:
-            sql_query = llm_response.strip()
-
-        if sql_query and not sql_query.endswith(';'):
-            sql_query += ';'
-
-        if sql_query == ';':
-            print("Warning: Extracted query is empty ';'. Check LLM generation.", file=sys.stderr)
-            return ""
-
-        return sql_query'''
-    
-    def execute_query_on_ilab(self, sql_query, use_stdin=False):
-        if not sql_query:
-            return "Error: Cannot execute an empty SQL query."
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(
-                hostname=self.ssh_config['hostname'],
-                username=self.ssh_config['username'],
-                password=self.ssh_config['password']
-            )
-
-            script_path = f"{self.ssh_config['script_location']}/ilab_script.py"
-
-            if use_stdin:
-                command = f'python3 {script_path}'
-                stdin, stdout, stderr = ssh.exec_command(command, get_pty=False)
-                stdin.write(sql_query.replace('\n', ' ') + '\n')
-                stdin.flush()
-                stdin.channel.shutdown_write()
-            else:
-                command = f'python3 {script_path} "{sql_query.replace('"', '\\"')}"'
-                stdin, stdout, stderr = ssh.exec_command(command, get_pty=False)
-
-            std_output = stdout.read().decode()
-            error_output = stderr.read().decode()
-            
-            ssh.close()
-
-            if error_output:
-                return f"Error Output (stderr):\n{error_output}\nStandard Output (stdout):\n{std_output}"
-            else:
-                return std_output
-
-        except Exception as e:
-            return f"SSH Connection/Execution Error: {str(e)}"
-
-    def run_interactive_loop(self):
-        print("Data LLM: Ask about the database.")
+    def loop(self):
+        print("\nData LLM: Ask about the database.")
         print("Type 'exit' to quit")
         print("==========================")
 
         while True:
-            user_question = input("\nEnter your question: ")
+            try:
+                user_question = input("\nEnter your question: ")
+            except EOFError:
+                print("\nInput stream closed.")
+                break
 
-            if user_question.lower() == "exit":
+            if user_question.strip().lower() == "exit":
                 print("Goodbye!")
                 break
 
-            print("\nGenerating SQL query...")
-            sql_query = self.generate_query(user_question)
+            if not user_question.strip():
+                 continue
 
-            print(f"Using SQL Query: \n {sql_query}")
+            print("\nGenerating SQL...")
+            sql_query = self.gen(user_question)
 
-            print("\nExecuting query on ILAB...")
             if not sql_query:
                 print("\nQuery Result:\nError: LLM did not generate a valid SQL query after cleaning.")
             else:
-                result = self.execute_query_on_ilab(sql_query, use_stdin=True)
+                print(f"Using SQL Query: \n{sql_query}")
+                print("\nExecuting query on ILAB...")
+                result = run.ilab(sql_query, self.persist_sshclient, self.ssh_config)
                 print("\nQuery Result:")
                 print(result)
+
             print("-" * 50)
 
 def main():
+    db_llm = None
     try:
-        db_llm = DatabaseLLM()
+        db_llm = LLM()
         os.system('cls' if os.name == 'nt' else 'clear')
         db_llm.setup_ssh()
-        db_llm.run_interactive_loop()
+        db_llm.script_exists()
+        db_llm.loop()
+
     except KeyboardInterrupt:
         print("\nExiting...")
+
+    finally:
+        if db_llm:
+            db_llm.close_ssh()
+        print("Connection closed. Exiting program.")
         sys.exit(0)
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        sys.exit(1)
 
 if __name__ == "__main__":
     main()
