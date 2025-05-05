@@ -1,7 +1,7 @@
 ###
 # This is the main file, where all execution should begin!
 # Make sure that the following files are in the same directory:
-# schema_subset.sql, start.py, data_llm.py, authenticator.py, cleaner.py, file_exists.py, ilab_exec.py, and the model (Phi-3.5-mini-instruct-Q4_K_M.gguf).
+# schema_subset.sql, database_llm.py, processing_prompt.py, authenticator.py, cleaner.py, file_exists.py, ilab_exec.py, and the model (Phi-3.5-mini-instruct-Q4_K_M.gguf).
 # Paths or URLs are not hardcoded, so choose whatever iLab you like, as well as where your
 # iLab script is located. Give only the path to the folder it is within, not the actual path of the file.
 # Trailing slashes are ignored.

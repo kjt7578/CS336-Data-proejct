@@ -1,6 +1,6 @@
 ###
 # Execute generated SQL on remote iLab via remote script.
-# Gets passed the persistent SSH connection established in data_llm.py
+# Gets passed the persistent SSH connection established in processing_prompt.py
 # and the config for the script location
 ###
 
