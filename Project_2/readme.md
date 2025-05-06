@@ -31,7 +31,12 @@ ilab_exec.py -> **Handles passing the query to the ilab server specified in auth
 I found it interesting how the process of transforming natural language into SQL queries using the LLM worked out—it was challenging to get the integration just right, but once it clicked, it felt like a real-world automation tool in action. Navigating the SSH connections and ensuring everything ran smoothly on the ILAB server added complexity to the task, but it was rewarding to see the system come together. Overall, the assignment pushed the group to think critically and power through some tough technical hurdles.
 
 6. Did you do the extra credit
+
 Yes
+
+
+Link to video:
+https://youtu.be/ep84PcBpuWA
 
 Referenced code:
 
