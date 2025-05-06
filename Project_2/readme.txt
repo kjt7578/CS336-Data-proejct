@@ -18,7 +18,7 @@ rc1250: create_database.sql
 
 3. What you found challenging
 
-jv500 - What was challenging was debugging the prompt, as well as cleaning its responses. Additionally, sometimes I ran into issues with the file existence check, which I was able to debug with the LLMs. Most of the debugging took my own time though, as the LLMs were unhelpful most of the time and gave me boilerplate code which had the exact same issues. I eventually managed to find the issues and fixed it (had to do with how paths are in the iLab). Also, there was an issue at the beginning where the ilab_script.py wasn't properly receiving the generated query, but managed to iron that out (it had to be compressed into a single line).
+jv500 - What was challenging was debugging the prompt, as well as cleaning its responses. It would sometimes give me just ; or blanks, and the LLM didn't help much with fixing that. Eventually found out it wasn't formatted correctly, which fixed the issue. Additionally, sometimes I ran into issues with the file existence check, which I was able to debug with the LLMs. Most of the debugging took my own time though, as the LLMs were unhelpful most of the time and gave me boilerplate code which had the exact same issues. I eventually managed to find the issues and fixed it (had to do with how paths are in the iLab). Also, there was an issue at the beginning where the ilab_script.py wasn't properly receiving the generated query, but managed to iron that out (it had to be compressed into a single line).
 
 4. What you found interesting
 
