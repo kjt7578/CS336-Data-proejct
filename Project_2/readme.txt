@@ -5,7 +5,7 @@ JEONG TAE KIM jk2065, Tayyar Mustamir tm858, Jiwanshu Verma jv500, RITHI CHAUHAN
 
 2. Contributions
 jk2065: Implemented ilab_script.py including extra credit
-tm858:
+tm858: created schema_subset.sql
 jv500:
 rc1250: create_database.sql
 
