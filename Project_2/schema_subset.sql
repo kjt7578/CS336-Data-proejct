@@ -82,13 +82,13 @@ CREATE TABLE Preliminary(
    ID SERIAL PRIMARY KEY
 );
 
--- Let's add it to our schema
+
 CREATE TABLE IF NOT EXISTS Loan_Type (
    loan_type VARCHAR(1) PRIMARY KEY,
    loan_type_name VARCHAR(20)
 );
 
--- Sample INSERT statements for Loan_Type
+
 INSERT INTO Loan_Type (loan_type, loan_type_name) VALUES
 ('1', 'Conventional'),
 ('2', 'FHA-insured'),
