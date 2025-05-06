@@ -22,14 +22,15 @@ ilab_exec.py -> **Handles passing the query to the ilab server specified in auth
   * jk2065: Implemented ilab_script.py including extra credit
   * tm858: created schema_subset.sql
   * jv500: created start.py (main file) and its related modules for ssh auth, response cleaning, llm calling, passing to ilab, and file existence/automatic home path checks.
-  * rc1250: create_database.sql
+  * rc1250: created create_database.sql, debugging
 
 3. What you found challenging
   * jv500 - What was challenging was debugging the prompt, as well as cleaning its responses. It would sometimes give me just ; or blanks, and the LLM didn't help much with fixing that. Eventually found out it wasn't formatted     correctly, which fixed the issue. Additionally, sometimes I ran into issues with the file existence check, which I was able to debug with the LLMs. Most of the debugging took my own time though, as the LLMs were unhelpful most of the time and gave me boilerplate code which had the exact same issues. I eventually managed to find the issues and fixed it (had to do with how paths are in the iLab). Also, there was an issue at the beginning where the ilab_script.py wasn't properly receiving the generated query, but managed to iron that out (it had to be compressed into a single line).
 
 4. What you found interesting
+I found it interesting how the process of transforming natural language into SQL queries using the LLM worked out—it was challenging to get the integration just right, but once it clicked, it felt like a real-world automation tool in action. Navigating the SSH connections and ensuring everything ran smoothly on the ILAB server added complexity to the task, but it was rewarding to see the system come together. Overall, the assignment pushed the group to think critically and power through some tough technical hurdles.
 
-5. Did you do the extra credit
+6. Did you do the extra credit
 Yes
 
 Referenced code:
