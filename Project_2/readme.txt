@@ -7,7 +7,7 @@ JEONG TAE KIM jk2065, Tayyar Mustamir tm858, Jiwanshu Verma jv500, RITHI CHAUHAN
 jk2065: Implemented ilab_script.py including extra credit
 tm858:
 jv500:
-rc1250:
+rc1250: create_database.sql
 
 3. What you found challenging
 
