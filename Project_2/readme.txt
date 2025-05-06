@@ -13,7 +13,7 @@ JEONG TAE KIM jk2065, Tayyar Mustamir tm858, Jiwanshu Verma jv500, RITHI CHAUHAN
 2. Contributions
 jk2065: Implemented ilab_script.py including extra credit
 tm858: created schema_subset.sql
-jv500: created start.py and its related modules for ssh auth, response cleaning, llm calling, passing to ilab, and file existence/automatic home path checks.
+jv500: created start.py (main file) and its related modules for ssh auth, response cleaning, llm calling, passing to ilab, and file existence/automatic home path checks.
 rc1250: create_database.sql
 
 3. What you found challenging
